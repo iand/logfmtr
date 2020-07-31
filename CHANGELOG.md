@@ -9,13 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 These are changes that will probably be included in the next release.
 
 ### Added
- * New AddCaller and CallerSkip options to add caller information to log messages
 
 ### Fixed
 
 ### Changed
  
 ### Removed
+
+## [v0.1.1] - 2020-07-31
+
+### Added
+ * New AddCaller and CallerSkip options to add caller information to log messages
 
 ## [v0.1.0] - 2020-07-31
 
