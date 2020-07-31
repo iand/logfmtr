@@ -23,6 +23,7 @@ func main() {
 	opts := logfmtr.DefaultOptions()
 	opts.Humanize = true
 	opts.Colorize = true
+	opts.CallerSkip = 0
 	demo(logfmtr.NewWithOptions(opts))
 }
 
@@ -33,5 +34,4 @@ func demo(base logr.Logger) {
 	log.V(1).V(1).Info("you should NOT see this")
 	log.Error(nil, "uh oh", "trouble", true, "reasons", []float64{0.1, 0.11, 3.14})
 	log.Error(fmt.Errorf("an error occurred"), "goodbye", "code", -1)
-
 }
