@@ -2,6 +2,8 @@
 
 An implementation of the [logr minimal logging API](github.com/go-logr/logr) that writes in [logfmt](https://www.brandur.org/logfmt) style.
 
+[![Build Status](https://travis-ci.org/iand/logfmtr.svg?branch=master)](https://travis-ci.org/iand/logfmtr)
+
 ## Author
 
 * [Ian Davis](http://github.com/iand) - <http://iandavis.com/>
