@@ -7,14 +7,6 @@ import (
 	"github.com/iand/logfmtr"
 )
 
-type E struct {
-	str string
-}
-
-func (e E) Error() string {
-	return e.str
-}
-
 func main() {
 	logfmtr.SetVerbosity(1)
 
@@ -25,6 +17,8 @@ func main() {
 	opts.Colorize = true
 	opts.CallerSkip = 0
 	demo(logfmtr.NewWithOptions(opts))
+
+	deferred()
 }
 
 func demo(base logr.Logger) {
@@ -34,4 +28,20 @@ func demo(base logr.Logger) {
 	log.V(1).V(1).Info("you should NOT see this")
 	log.Error(nil, "uh oh", "trouble", true, "reasons", []float64{0.1, 0.11, 3.14})
 	log.Error(fmt.Errorf("an error occurred"), "goodbye", "code", -1)
+}
+
+func deferred() {
+	l1 := logfmtr.New().WithName("before")
+	l2 := logfmtr.New().WithName("after")
+	l3 := l2.WithValues("some", "value")
+
+	l1.Info("this should be logged with default options")
+	opts := logfmtr.DefaultOptions()
+	opts.Humanize = true
+	opts.Colorize = true
+	logfmtr.UseOptions(opts)
+
+	l2.Info("this should be logged with global options since instatiation was deferred until first write")
+	l3.Info("this should also be logged with new options")
+	l1.Info("this should be logged with the old options since first write was before we set global options")
 }
