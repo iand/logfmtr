@@ -1,6 +1,6 @@
 # logfmtr
 
-An implementation of the [logr minimal logging API](github.com/go-logr/logr) that writes in [logfmt](https://www.brandur.org/logfmt) style.
+An implementation of the [logr minimal logging API](https://github.com/go-logr/logr) that writes in [logfmt](https://www.brandur.org/logfmt) style.
 
 [![Build Status](https://travis-ci.org/iand/logfmtr.svg?branch=master)](https://travis-ci.org/iand/logfmtr)
 [![Go Report Card](https://goreportcard.com/badge/github.com/iand/logfmtr)](https://goreportcard.com/report/github.com/iand/logfmtr)
@@ -8,7 +8,7 @@ An implementation of the [logr minimal logging API](github.com/go-logr/logr) tha
 
 ## Getting Started
 
-This is a no frills logging package that follows the [logr minimal logging API](github.com/go-logr/logr) 
+This is a no frills logging package that follows the [logr minimal logging API](https://github.com/go-logr/logr) 
 and by default writes logs in [logfmt](https://www.brandur.org/logfmt) format, a line of space delimited
 key/value pairs.
 
