@@ -16,6 +16,16 @@ These are changes that will probably be included in the next release.
  
 ### Removed
 
+## [v0.1.3] - 2020-09-20
+
+### Changed 
+ * Change to deferred loggers that instantiate their configuration on first use.
+
+## [v0.1.2] - 2020-09-13
+
+### Changed 
+ * Updated travis configuration to target recent Go versions
+
 ## [v0.1.1] - 2020-07-31
 
 ### Added
