@@ -83,7 +83,7 @@ type Options struct {
 	// AddCaller indicates that log messages should include the file and line number of the caller of the logger.
 	AddCaller bool
 
-	// CallerSkip adds frames to skip when determing the caller of the logger. Useful when the logger is wrapped
+	// CallerSkip adds frames to skip when determining the caller of the logger. Useful when the logger is wrapped
 	// by another logger.
 	CallerSkip int
 }
