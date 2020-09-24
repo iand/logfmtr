@@ -44,6 +44,19 @@ func New() *Logger {
 	return &Logger{}
 }
 
+// NewNamed returns a deferred logger with the given name that writes in logfmt using the default options.
+func NewNamed(name string) *Logger {
+	return &Logger{
+		dfn: func(c *core) {
+			if c.name != "" {
+				c.name = c.name + c.nameDelim + name
+			} else {
+				c.name = name
+			}
+		},
+	}
+}
+
 // NewWithOptions returns an instantiated logger that writes in logfmt using the supplied options. Panics if
 // no writer is supplied in the options.
 func NewWithOptions(opts Options) *Logger {
@@ -106,6 +119,9 @@ func (l *Logger) instantiate() {
 		l.core = &core{}
 		l.core.applyOptions(goptions)
 		goptionsmu.Unlock()
+		if l.dfn != nil {
+			l.dfn(l.core)
+		}
 		return
 	}
 

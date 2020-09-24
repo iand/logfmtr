@@ -27,3 +27,10 @@ func ExampleNew() {
 	// Logger is instantiated with the options
 	logger.Info("the sun is shining")
 }
+
+func ExampleNewNamed() {
+	// Create the logger with a name
+	logger := logfmtr.NewNamed("europa")
+
+	logger.Info("the sun is shining")
+}

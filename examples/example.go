@@ -32,7 +32,7 @@ func demo(base logr.Logger) {
 
 func deferred() {
 	l1 := logfmtr.New().WithName("before")
-	l2 := logfmtr.New().WithName("after")
+	l2 := logfmtr.NewNamed("after")
 	l3 := l2.WithValues("some", "value")
 
 	l1.Info("this should be logged with default options")

@@ -10,7 +10,8 @@ These are changes that will probably be included in the next release.
 
 ### Added
  * Add Null logger
-
+ * Add NewNamed convenience function
+ 
 ### Fixed
 
 ### Changed
