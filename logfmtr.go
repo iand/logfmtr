@@ -88,8 +88,6 @@ type Options struct {
 	CallerSkip int
 }
 
-var _ logr.Logger = (*Logger)(nil)
-
 // Logger is a logger that writes messages in the logfmt style.
 // See https://www.brandur.org/logfmt for more information.
 type Logger struct {
@@ -355,3 +353,30 @@ const (
 	colorYellow  = "\x1b[1;33m"
 	colorBlue    = "\x1b[1;34m"
 )
+
+// Null is a non-functional logger that may be used as a placeholder or to disable logging with zero overhead
+var Null nullLogger
+
+type nullLogger struct{}
+
+// Enabled always reports false
+func (n nullLogger) Enabled() bool { return false }
+
+// Info is a no-op
+func (n nullLogger) Info(string, ...interface{}) {}
+
+// Error is a no-op
+func (n nullLogger) Error(error, string, ...interface{}) {}
+
+// V is not supported and panics if called
+func (n nullLogger) V(int) logr.Logger { panic("V is not supported by null logger") }
+
+// WithName is not supported and panics if called
+func (n nullLogger) WithName(string) logr.Logger {
+	panic("WithName is not supported by null logger")
+}
+
+// WithValues is not supported and panics if called
+func (n nullLogger) WithValues(...interface{}) logr.Logger {
+	panic("WithValues is not supported by null logger")
+}
