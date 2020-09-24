@@ -1,6 +1,8 @@
 package logfmtr_test
 
 import (
+	"context"
+
 	"github.com/go-logr/logr"
 	"github.com/iand/logfmtr"
 )
@@ -33,4 +35,23 @@ func ExampleNewNamed() {
 	logger := logfmtr.NewNamed("europa")
 
 	logger.Info("the sun is shining")
+}
+
+func ExampleFromContext() {
+	// Create a logger
+	root := logfmtr.New().WithName("root").V(2)
+
+	// Embed the logger in a context
+	loggerCtx := logfmtr.NewContext(context.Background(), root)
+
+	// A function that uses a context
+	other := func(ctx context.Context) {
+		// Retrieve the logger from the context
+		logger := logfmtr.FromContext(ctx)
+		logger.Info("the sun is shining")
+	}
+
+	// Pass the context to the other function
+	other(loggerCtx)
+
 }

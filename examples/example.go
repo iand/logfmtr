@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/go-logr/logr"
@@ -19,6 +20,10 @@ func main() {
 	demo(logfmtr.NewWithOptions(opts))
 
 	deferred()
+
+	root := logfmtr.NewWithOptions(opts).WithName("root").WithValues("app", "name")
+	loggerCtx := logfmtr.NewContext(context.Background(), root)
+	contextDemo(loggerCtx)
 }
 
 func demo(base logr.Logger) {
@@ -44,4 +49,9 @@ func deferred() {
 	l2.Info("this should be logged with global options since instatiation was deferred until first write")
 	l3.Info("this should also be logged with new options")
 	l1.Info("this should be logged with the old options since first write was before we set global options")
+}
+
+func contextDemo(ctx context.Context) {
+	log := logfmtr.FromContext(ctx).WithName("contextDemo")
+	log.Info("hello via a context")
 }

@@ -48,11 +48,7 @@ func New() *Logger {
 func NewNamed(name string) *Logger {
 	return &Logger{
 		dfn: func(c *core) {
-			if c.name != "" {
-				c.name = c.name + c.nameDelim + name
-			} else {
-				c.name = name
-			}
+			c.appendName(name)
 		},
 	}
 }
@@ -166,7 +162,7 @@ func (l *Logger) V(level int) logr.Logger {
 	return &Logger{
 		parent: l,
 		dfn: func(c *core) {
-			c.level += level
+			c.addLevel(level)
 		},
 	}
 }
@@ -176,11 +172,7 @@ func (l *Logger) WithName(name string) logr.Logger {
 	return &Logger{
 		parent: l,
 		dfn: func(c *core) {
-			if c.name != "" {
-				c.name = c.name + c.nameDelim + name
-			} else {
-				c.name = name
-			}
+			c.appendName(name)
 		},
 	}
 }
@@ -191,13 +183,14 @@ func (l *Logger) WithValues(kvs ...interface{}) logr.Logger {
 		parent: l,
 		dfn: func(c *core) {
 			values := c.flatten(kvs...)
-			if len(c.values) > 0 {
-				c.values = c.values + " " + values
-			} else {
-				c.values = values
-			}
+			c.appendValues(values)
 		},
 	}
+}
+
+func (l *Logger) getCore() core {
+	l.init.Do(l.instantiate)
+	return *l.core
 }
 
 type core struct {
@@ -338,6 +331,32 @@ func (c *core) key(s string) string {
 		return colorYellow + s + colorDefault
 	}
 
+}
+
+func (c *core) appendName(name string) {
+	if name == "" {
+		return
+	}
+	if c.name != "" {
+		c.name = c.name + c.nameDelim + name
+	} else {
+		c.name = name
+	}
+}
+
+func (c *core) appendValues(values string) {
+	if values == "" {
+		return
+	}
+	if len(c.values) > 0 {
+		c.values = c.values + " " + values
+	} else {
+		c.values = values
+	}
+}
+
+func (c *core) addLevel(level int) {
+	c.level += level
 }
 
 func stringify(v interface{}) string {
