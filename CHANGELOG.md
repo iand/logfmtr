@@ -9,15 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 These are changes that will probably be included in the next release.
 
 ### Added
- * Add Null logger
- * Add NewNamed convenience function
- * Add Context support
  
 ### Fixed
 
 ### Changed
  
 ### Removed
+
+## [v0.1.4] - 2020-10-11
+
+### Added
+ * Add Null logger
+ * Add NewNamed convenience function
+ * Add Context support
 
 ## [v0.1.3] - 2020-09-20
 
