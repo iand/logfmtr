@@ -9,17 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 These are changes that will probably be included in the next release.
 
 ### Added
- * Add DisableLogger and EnableLogger to disable/enable specific named loggers.
- 
 
 ### Fixed
 
 ### Changed
  
 ### Removed
+
+## [v0.1.5] - 2020-11-23
+
+### Added
+ * Add DisableLogger and EnableLogger to disable/enable specific named loggers.
+
+### Removed
  * Deprecated Null logger and it will be removed in next version, use logr.Discard instead
  * Deprecated FromContext and NewContext and they will be removed in next version, use logr.FromContext and logr.NewContext 
-
 
 ## [v0.1.4] - 2020-10-11
 
