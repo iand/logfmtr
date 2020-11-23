@@ -26,8 +26,18 @@ func SetVerbosity(v int) int {
 	return int(old)
 }
 
-var goptionsmu sync.Mutex
-var goptions = DefaultOptions()
+var (
+	goptionsmu sync.Mutex
+	goptions   = DefaultOptions()
+
+	disabledLoggersMu sync.Mutex // synchronises writes to disabledLoggers map
+	disabledLoggers   atomic.Value
+	anyDisabled       int32 = 0 // an atomicly accessed variable that is set to 1 if there are any loggers that have been manually disabled
+)
+
+func init() {
+	disabledLoggers.Store(map[string]bool{})
+}
 
 // UseOptions sets options that new loggers will use when it they are instantiated.
 func UseOptions(opts Options) {
@@ -140,7 +150,14 @@ func (l *Logger) applyOptions(opts Options) {
 // Enabled repoorts whether this Logger is enabled with respect to the current global log level.
 func (l *Logger) Enabled() bool {
 	l.init.Do(l.instantiate)
-	return l.core.level <= int(atomic.LoadInt32(&gv))
+	if l.core.level > int(atomic.LoadInt32(&gv)) {
+		return false
+	}
+	if l.core.name == "" || atomic.LoadInt32(&anyDisabled) == 0 {
+		return true
+	}
+	disabled := disabledLoggers.Load().(map[string]bool)
+	return !disabled[l.core.name]
 }
 
 // Info logs a non-error message with the given key/value pairs as context.
@@ -204,6 +221,7 @@ type core struct {
 	colorize   bool
 	addCaller  bool
 	callerSkip int
+	disabled   bool
 }
 
 func (c *core) write(humanprefix, msg string, values string, extras ...interface{}) {
@@ -330,7 +348,6 @@ func (c *core) key(s string) string {
 	default:
 		return colorYellow + s + colorDefault
 	}
-
 }
 
 func (c *core) appendName(name string) {
@@ -390,28 +407,35 @@ const (
 )
 
 // Null is a non-functional logger that may be used as a placeholder or to disable logging with zero overhead
-var Null nullLogger
+// Deprecated: overlaps with logr functionality, use logr.Discard instead
+var Null = logr.Discard()
 
-type nullLogger struct{}
-
-// Enabled always reports false
-func (n nullLogger) Enabled() bool { return false }
-
-// Info is a no-op
-func (n nullLogger) Info(string, ...interface{}) {}
-
-// Error is a no-op
-func (n nullLogger) Error(error, string, ...interface{}) {}
-
-// V is not supported and panics if called
-func (n nullLogger) V(int) logr.Logger { panic("V is not supported by null logger") }
-
-// WithName is not supported and panics if called
-func (n nullLogger) WithName(string) logr.Logger {
-	panic("WithName is not supported by null logger")
+func DisableLogger(name string) {
+	setLoggerDisabledStatus(name, true)
 }
 
-// WithValues is not supported and panics if called
-func (n nullLogger) WithValues(...interface{}) logr.Logger {
-	panic("WithValues is not supported by null logger")
+func EnableLogger(name string) {
+	setLoggerDisabledStatus(name, false)
+}
+
+func setLoggerDisabledStatus(name string, disabled bool) {
+	disabledLoggersMu.Lock()
+	defer disabledLoggersMu.Unlock()
+	current := disabledLoggers.Load().(map[string]bool)
+	next := make(map[string]bool, len(current))
+	for k, v := range current {
+		if k == name {
+			continue
+		}
+		next[k] = v
+	}
+	if disabled {
+		next[name] = disabled
+	}
+	disabledLoggers.Store(next)
+	if len(next) == 0 {
+		atomic.StoreInt32(&anyDisabled, 0)
+	} else {
+		atomic.StoreInt32(&anyDisabled, 1)
+	}
 }

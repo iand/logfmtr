@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/go-logr/logr"
@@ -21,9 +20,7 @@ func main() {
 
 	deferred()
 
-	root := logfmtr.NewWithOptions(opts).WithName("root").WithValues("app", "name")
-	loggerCtx := logfmtr.NewContext(context.Background(), root)
-	contextDemo(loggerCtx)
+	disableDemo()
 }
 
 func demo(base logr.Logger) {
@@ -51,7 +48,16 @@ func deferred() {
 	l1.Info("this should be logged with the old options since first write was before we set global options")
 }
 
-func contextDemo(ctx context.Context) {
-	log := logfmtr.FromContext(ctx).WithName("contextDemo")
-	log.Info("hello via a context")
+func disableDemo() {
+	log := logfmtr.NewNamed("europa")
+	log.Info("hello, this logger is enabled")
+
+	logfmtr.DisableLogger("europa")
+	log.Info("you should NOT see this, the logger is disabled")
+
+	log2 := log.WithName("moon")
+	log2.Info("you should see this, a child logger does not inherit from its parent")
+
+	logfmtr.EnableLogger("europa")
+	log.Info("you should see this now, the logger was enabled again")
 }

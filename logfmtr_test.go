@@ -1,14 +1,14 @@
 package logfmtr_test
 
 import (
-	"context"
-
 	"github.com/go-logr/logr"
 	"github.com/iand/logfmtr"
 )
 
-var _ logr.Logger = (*logfmtr.Logger)(nil)
-var _ logr.Logger = logfmtr.Null
+var (
+	_ logr.Logger = (*logfmtr.Logger)(nil)
+	_ logr.Logger = logfmtr.Null
+)
 
 func ExampleNewWithOptions() {
 	opts := logfmtr.DefaultOptions()
@@ -37,21 +37,15 @@ func ExampleNewNamed() {
 	logger.Info("the sun is shining")
 }
 
-func ExampleFromContext() {
-	// Create a logger
-	root := logfmtr.New().WithName("root").V(2)
+func ExampleDisableLogger() {
+	// Create the logger with a name
+	logger := logfmtr.NewNamed("europa")
 
-	// Embed the logger in a context
-	loggerCtx := logfmtr.NewContext(context.Background(), root)
+	// It logs normally
+	logger.Info("the sun is shining")
 
-	// A function that uses a context
-	other := func(ctx context.Context) {
-		// Retrieve the logger from the context
-		logger := logfmtr.FromContext(ctx)
-		logger.Info("the sun is shining")
-	}
+	// Disable the logger
+	logfmtr.DisableLogger("europa")
 
-	// Pass the context to the other function
-	other(loggerCtx)
-
+	logger.Info("the sun not shining now")
 }

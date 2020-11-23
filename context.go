@@ -9,23 +9,17 @@ import (
 type contextKey struct{}
 
 // FromContext returns a logger constructed from the context or a new logger if no logger details are found in the context.
+// Deprecated: overlaps with logr functionality, use logr.FromContext instead
 func FromContext(ctx context.Context) *Logger {
-	if v, ok := ctx.Value(contextKey{}).(core); ok {
-		return &Logger{
-			dfn: func(c *core) {
-				*c = v
-			},
-		}
+	l := logr.FromContext(ctx)
+	if ll, ok := l.(*Logger); ok {
+		return ll
 	}
-
 	return New()
 }
 
 // NewContext returns a new context that embeds the logger's name, values, level and other options.
+// Deprecated: overlaps with logr functionality, use logr.NewContext instead
 func NewContext(ctx context.Context, l logr.Logger) context.Context {
-	if lf, ok := l.(*Logger); ok {
-		return context.WithValue(ctx, contextKey{}, lf.getCore())
-	}
-
-	return ctx
+	return logr.NewContext(ctx, l)
 }
