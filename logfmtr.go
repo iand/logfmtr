@@ -76,7 +76,7 @@ func NewWithOptions(opts Options) *Logger {
 func DefaultOptions() Options {
 	return Options{
 		Writer:          os.Stdout,
-		TimestampFormat: time.RFC3339Nano,
+		TimestampFormat: "2006-01-02T15:04:05.000000000Z07:00",
 		NameDelim:       ".",
 	}
 }
@@ -256,14 +256,14 @@ func (c *core) write(humanprefix, msg string, values string, extras ...interface
 			b.WriteString("logger=")
 			b.WriteString(quote(c.name))
 		}
-		b.WriteRune(' ')
-		b.WriteString("msg=")
-		b.WriteString(quote(msg))
 		if c.tsFormat != "" {
 			b.WriteRune(' ')
 			b.WriteString("ts=")
 			b.WriteString(quote(time.Now().UTC().Format(c.tsFormat)))
 		}
+		b.WriteRune(' ')
+		b.WriteString("msg=")
+		b.WriteString(quote(msg))
 		if c.addCaller {
 			b.WriteRune(' ')
 			b.WriteString("caller=")

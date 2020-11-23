@@ -13,6 +13,8 @@ These are changes that will probably be included in the next release.
 ### Fixed
 
 ### Changed
+ * Write ts field before msg in standard output.
+ * Use a fixed number of fractional seconds in timestamp.
  
 ### Removed
 
