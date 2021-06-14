@@ -1,2 +1,2 @@
-github.com/go-logr/logr v0.3.0 h1:q4c+kbcR0d5rSurhBR8dIgieOaYpXtsdTYfx22Cu6rs=
-github.com/go-logr/logr v0.3.0/go.mod h1:z6/tIYblkpsD+a4lm/fGIIU9mZ+XfAiaFtq7xTgseGU=
+github.com/go-logr/logr v1.0.0-rc1 h1:+ul9F74rBkPajeP8m4o3o0tiglmzNFsPnuhYyBCQ0Sc=
+github.com/go-logr/logr v1.0.0-rc1/go.mod h1:z6/tIYblkpsD+a4lm/fGIIU9mZ+XfAiaFtq7xTgseGU=

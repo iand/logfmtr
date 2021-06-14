@@ -1,13 +1,7 @@
 package logfmtr_test
 
 import (
-	"github.com/go-logr/logr"
 	"github.com/iand/logfmtr"
-)
-
-var (
-	_ logr.Logger = (*logfmtr.Logger)(nil)
-	_ logr.Logger = logfmtr.Null
 )
 
 func ExampleNewWithOptions() {
