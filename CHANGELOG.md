@@ -8,16 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 These are changes that will probably be included in the next release.
 
-### Added
 
-### Fixed
+## [v0.2.0] - 2021-07-07
+
+This version supports the logr v1.0 API which contains breaking changes from pre-1.0 versions.
 
 ### Changed
+ * Support logr v1.0 API 
  * Write ts field before msg in standard output.
  * Use a fixed number of fractional seconds in timestamp.
  
-### Removed
-
 ## [v0.1.5] - 2020-11-23
 
 ### Added
