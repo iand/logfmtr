@@ -50,25 +50,21 @@ func UseOptions(opts Options) {
 // The logger defers configuring its options until it is instantiated with the first call to Info, Error
 // or Enabled or the first call to those function on any child loggers created via V, WithName or
 // WithValues.
-func New() *Logger {
-	return &Logger{}
+func New() logr.Logger {
+	return logr.New(&sink{})
 }
 
 // NewNamed returns a deferred logger with the given name that writes in logfmt using the default options.
-func NewNamed(name string) *Logger {
-	return &Logger{
-		dfn: func(c *core) {
-			c.appendName(name)
-		},
-	}
+func NewNamed(name string) logr.Logger {
+	return New().WithName(name)
 }
 
 // NewWithOptions returns an instantiated logger that writes in logfmt using the supplied options. Panics if
 // no writer is supplied in the options.
-func NewWithOptions(opts Options) *Logger {
-	l := &Logger{}
-	l.applyOptions(opts)
-	return l
+func NewWithOptions(opts Options) logr.Logger {
+	s := &sink{}
+	s.applyOptions(opts)
+	return logr.New(s)
 }
 
 // DefaultOptions returns the default options used by New unless overridden by a call to UseOptions.
@@ -107,22 +103,27 @@ type Options struct {
 	CallerSkip int
 }
 
-// Logger is a logger that writes messages in the logfmt style.
+var _ logr.LogSink = (*sink)(nil)
+
+// sink is a logger sink that writes messages in the logfmt style.
 // See https://www.brandur.org/logfmt for more information.
-type Logger struct {
-	core   *core
-	init   sync.Once
-	parent *Logger
-	dfn    func(*core)
+type sink struct {
+	core        *core
+	init        sync.Once
+	parent      *sink
+	runtimeInfo logr.RuntimeInfo
+	dfn         func(*core)
 }
 
-func (l *Logger) instantiate() {
+func (l *sink) instantiate() {
 	if l.core != nil {
 		return
 	}
 	if l.parent == nil {
 		goptionsmu.Lock()
-		l.core = &core{}
+		l.core = &core{
+			runtimeInfo: l.runtimeInfo,
+		}
 		l.core.applyOptions(goptions)
 		goptionsmu.Unlock()
 		if l.dfn != nil {
@@ -134,7 +135,7 @@ func (l *Logger) instantiate() {
 	l.core = l.parent.copyCore(l.dfn)
 }
 
-func (l *Logger) copyCore(dfn func(*core)) *core {
+func (l *sink) copyCore(dfn func(*core)) *core {
 	l.init.Do(l.instantiate)
 
 	c := *l.core
@@ -142,15 +143,19 @@ func (l *Logger) copyCore(dfn func(*core)) *core {
 	return &c
 }
 
-func (l *Logger) applyOptions(opts Options) {
+func (l *sink) applyOptions(opts Options) {
 	l.core = &core{}
 	l.core.applyOptions(opts)
 }
 
-// Enabled repoorts whether this Logger is enabled with respect to the current global log level.
-func (l *Logger) Enabled() bool {
+func (l *sink) Init(info logr.RuntimeInfo) {
+	l.runtimeInfo = info
+}
+
+// Enabled reports whether this Logger is enabled with respect to the current global log level.
+func (l *sink) Enabled(level int) bool {
 	l.init.Do(l.instantiate)
-	if l.core.level > int(atomic.LoadInt32(&gv)) {
+	if level > int(atomic.LoadInt32(&gv)) {
 		return false
 	}
 	if l.core.name == "" || atomic.LoadInt32(&anyDisabled) == 0 {
@@ -161,32 +166,18 @@ func (l *Logger) Enabled() bool {
 }
 
 // Info logs a non-error message with the given key/value pairs as context.
-func (l *Logger) Info(msg string, kvs ...interface{}) {
-	if l.Enabled() {
-		l.core.write("info", msg, l.core.flatten(kvs...))
-	}
+func (l *sink) Info(level int, msg string, kvs ...interface{}) {
+	l.core.write(level, "info", msg, l.core.flatten(kvs...))
 }
 
 // Error logs an error, with the given message and key/value pairs as context.
-func (l *Logger) Error(err error, msg string, kvs ...interface{}) {
-	if l.Enabled() {
-		l.core.write("error", msg, l.core.flatten(kvs...), "error", err)
-	}
-}
-
-// V returns a logger for a specific verbosity level, relative to this Logger.
-func (l *Logger) V(level int) logr.Logger {
-	return &Logger{
-		parent: l,
-		dfn: func(c *core) {
-			c.addLevel(level)
-		},
-	}
+func (l *sink) Error(err error, msg string, kvs ...interface{}) {
+	l.core.write(0, "error", msg, l.core.flatten(kvs...), "error", err)
 }
 
 // WithName returns a logger with a new element added to the logger's name.
-func (l *Logger) WithName(name string) logr.Logger {
-	return &Logger{
+func (l *sink) WithName(name string) logr.LogSink {
+	return &sink{
 		parent: l,
 		dfn: func(c *core) {
 			c.appendName(name)
@@ -195,8 +186,8 @@ func (l *Logger) WithName(name string) logr.Logger {
 }
 
 // WithValues returns a logger with additional key-value pairs of context.
-func (l *Logger) WithValues(kvs ...interface{}) logr.Logger {
-	return &Logger{
+func (l *sink) WithValues(kvs ...interface{}) logr.LogSink {
+	return &sink{
 		parent: l,
 		dfn: func(c *core) {
 			values := c.flatten(kvs...)
@@ -205,26 +196,29 @@ func (l *Logger) WithValues(kvs ...interface{}) logr.Logger {
 	}
 }
 
-func (l *Logger) getCore() core {
-	l.init.Do(l.instantiate)
-	return *l.core
+func (l *sink) WithCallDepth(depth int) logr.LogSink {
+	return &sink{
+		parent: l,
+		dfn: func(c *core) {
+			c.callerSkip += depth
+		},
+	}
 }
 
 type core struct {
-	w          io.Writer
-	level      int
-	name       string
-	values     string
-	humanize   bool
-	tsFormat   string
-	nameDelim  string
-	colorize   bool
-	addCaller  bool
-	callerSkip int
-	disabled   bool
+	w           io.Writer
+	name        string
+	values      string
+	humanize    bool
+	tsFormat    string
+	nameDelim   string
+	colorize    bool
+	addCaller   bool
+	callerSkip  int
+	runtimeInfo logr.RuntimeInfo
 }
 
-func (c *core) write(humanprefix, msg string, values string, extras ...interface{}) {
+func (c *core) write(level int, humanprefix, msg string, values string, extras ...interface{}) {
 	var b bytes.Buffer
 	if c.humanize {
 		if c.colorize {
@@ -235,7 +229,7 @@ func (c *core) write(humanprefix, msg string, values string, extras ...interface
 			}
 		}
 
-		b.WriteString(fmt.Sprintf("%d %-5s | %15s | %-30s", c.level, humanprefix, time.Now().UTC().Format("15:04:05.000000"), msg))
+		b.WriteString(fmt.Sprintf("%d %-5s | %15s | %-30s", level, humanprefix, time.Now().UTC().Format("15:04:05.000000"), msg))
 		if c.name != "" {
 			b.WriteRune(' ')
 			b.WriteString(c.key("logger"))
@@ -246,11 +240,11 @@ func (c *core) write(humanprefix, msg string, values string, extras ...interface
 			b.WriteRune(' ')
 			b.WriteString(c.key("caller"))
 			b.WriteString("=")
-			b.WriteString(c.caller(2))
+			b.WriteString(c.caller(1))
 		}
 	} else {
 		b.WriteString("level=")
-		b.WriteString(strconv.Itoa(c.level))
+		b.WriteString(strconv.Itoa(level))
 		if c.name != "" {
 			b.WriteRune(' ')
 			b.WriteString("logger=")
@@ -267,7 +261,7 @@ func (c *core) write(humanprefix, msg string, values string, extras ...interface
 		if c.addCaller {
 			b.WriteRune(' ')
 			b.WriteString("caller=")
-			b.WriteString(c.caller(2))
+			b.WriteString(c.caller(1))
 		}
 	}
 	if len(extras) > 0 {
@@ -289,7 +283,7 @@ func (c *core) write(humanprefix, msg string, values string, extras ...interface
 
 func (c *core) caller(skip int) string {
 	for i := 1; i < 3; i++ {
-		_, file, line, ok := runtime.Caller(skip + c.callerSkip + i)
+		_, file, line, ok := runtime.Caller(c.runtimeInfo.CallDepth + skip + c.callerSkip + i)
 		if ok && file != "<autogenerated>" {
 			return path.Base(file) + ":" + strconv.Itoa(line)
 		}
@@ -372,10 +366,6 @@ func (c *core) appendValues(values string) {
 	}
 }
 
-func (c *core) addLevel(level int) {
-	c.level += level
-}
-
 func stringify(v interface{}) string {
 	var s string
 	switch vv := v.(type) {
@@ -405,10 +395,6 @@ const (
 	colorYellow  = "\x1b[1;33m"
 	colorBlue    = "\x1b[1;34m"
 )
-
-// Null is a non-functional logger that may be used as a placeholder or to disable logging with zero overhead
-// Deprecated: overlaps with logr functionality, use logr.Discard instead
-var Null = logr.Discard()
 
 func DisableLogger(name string) {
 	setLoggerDisabledStatus(name, true)

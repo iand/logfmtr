@@ -37,14 +37,14 @@ func deferred() {
 	l2 := logfmtr.NewNamed("after")
 	l3 := l2.WithValues("some", "value")
 
-	l1.Info("this should be logged with default options")
+	l1.Info("this should be logged with default options, not humanized or colorized")
 	opts := logfmtr.DefaultOptions()
 	opts.Humanize = true
 	opts.Colorize = true
 	logfmtr.UseOptions(opts)
 
-	l2.Info("this should be logged with global options since instatiation was deferred until first write")
-	l3.Info("this should also be logged with new options")
+	l2.Info("this should be logged with new global options, humanized and colorized, since instantiation was deferred until first write")
+	l3.Info("this should also be logged with new options, humanized and colorized")
 	l1.Info("this should be logged with the old options since first write was before we set global options")
 }
 
