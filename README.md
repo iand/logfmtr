@@ -13,10 +13,10 @@ and by default writes logs in [logfmt](https://www.brandur.org/logfmt) format, a
 key/value pairs.
 
 ```
-level=0 logger=MyName msg=hello ts=2020-09-20T14:31:10.905267839Z user=you val1=1 val2=map[k:1]
-level=1 logger=MyName msg="you should see this" ts=2020-09-20T14:31:10.905279546Z user=you
-level=0 logger=MyName msg="uh oh" ts=2020-09-20T14:31:10.905288008Z error=<nil> user=you trouble=true reasons="[0.1 0.11 3.14]"
-level=0 logger=MyName msg=goodbye ts=2020-09-20T14:31:10.905291479Z error="an error occurred" user=you code=-1
+level=0 logger=MyName ts=2020-09-20T14:31:10.905267839Z msg=hello user=you val1=1 val2=map[k:1]
+level=1 logger=MyName ts=2020-09-20T14:31:10.905279546Z msg="you should see this" user=you
+level=0 logger=MyName ts=2020-09-20T14:31:10.905288008Z msg="uh oh" error=<nil> user=you trouble=true reasons="[0.1 0.11 3.14]"
+level=0 logger=MyName ts=2020-09-20T14:31:10.905291479Z msg=goodbye error="an error occurred" user=you code=-1
 ```
 
 A more human friendly output format is also provided which can be configured using the `humanize` option:
