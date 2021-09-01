@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 These are changes that will probably be included in the next release.
 
+## [v0.2.1] - 2021-09-01
+
+### Fixed
+ * Fixed panic when Error is first call on a logger (thanks @wutz for report)
+ * Updated readme example to match actual output (thanks @seankhliao)
+
 
 ## [v0.2.0] - 2021-07-07
 
