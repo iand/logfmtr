@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 These are changes that will probably be included in the next release.
 
+### Added
+ * Add benchmarks
+
 ## [v0.2.1] - 2021-09-01
 
 ### Fixed

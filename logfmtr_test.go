@@ -1,6 +1,7 @@
 package logfmtr_test
 
 import (
+	"io"
 	"testing"
 
 	"github.com/iand/logfmtr"
@@ -46,6 +47,12 @@ func ExampleDisableLogger() {
 	logger.Info("the sun not shining now")
 }
 
+func discard() logfmtr.Options {
+	opts := logfmtr.DefaultOptions()
+	opts.Writer = io.Discard
+	return opts
+}
+
 func TestIssue3(t *testing.T) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -53,8 +60,7 @@ func TestIssue3(t *testing.T) {
 		}
 	}()
 	logfmtr.SetVerbosity(1)
-	opts := logfmtr.DefaultOptions()
-	base := logfmtr.NewWithOptions(opts)
+	base := logfmtr.NewWithOptions(discard())
 
 	log := base.WithValues("user", "you")
 
