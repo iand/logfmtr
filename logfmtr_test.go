@@ -1,6 +1,8 @@
 package logfmtr_test
 
 import (
+	"testing"
+
 	"github.com/iand/logfmtr"
 )
 
@@ -42,4 +44,20 @@ func ExampleDisableLogger() {
 	logfmtr.DisableLogger("europa")
 
 	logger.Info("the sun not shining now")
+}
+
+func TestIssue3(t *testing.T) {
+	defer func() {
+		if r := recover(); r != nil {
+			t.Fatalf("unexpected panic: %v", r)
+		}
+	}()
+	logfmtr.SetVerbosity(1)
+	opts := logfmtr.DefaultOptions()
+	base := logfmtr.NewWithOptions(opts)
+
+	log := base.WithValues("user", "you")
+
+	// Should not panic
+	log.Error(nil, "uh oh", "trouble", true, "reasons", []float64{0.1, 0.11, 3.14})
 }

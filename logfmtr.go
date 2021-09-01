@@ -167,11 +167,13 @@ func (l *sink) Enabled(level int) bool {
 
 // Info logs a non-error message with the given key/value pairs as context.
 func (l *sink) Info(level int, msg string, kvs ...interface{}) {
+	l.init.Do(l.instantiate)
 	l.core.write(level, "info", msg, l.core.flatten(kvs...))
 }
 
 // Error logs an error, with the given message and key/value pairs as context.
 func (l *sink) Error(err error, msg string, kvs ...interface{}) {
+	l.init.Do(l.instantiate)
 	l.core.write(0, "error", msg, l.core.flatten(kvs...), "error", err)
 }
 
