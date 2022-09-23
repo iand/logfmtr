@@ -2,9 +2,10 @@
 
 An implementation of the [logr minimal logging API](https://github.com/go-logr/logr) that writes in [logfmt](https://www.brandur.org/logfmt) style.
 
-[![Build Status](https://travis-ci.org/iand/logfmtr.svg?branch=master)](https://travis-ci.org/iand/logfmtr)
-[![Go Report Card](https://goreportcard.com/badge/github.com/iand/logfmtr)](https://goreportcard.com/report/github.com/iand/logfmtr)
 [![go.dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white)](https://pkg.go.dev/github.com/iand/logfmtr)
+[![Check Status](https://github.com/iand/logfmtr/actions/workflows/check.yml/badge.svg)](https://github.com/iand/logfmtr/actions/workflows/check.yml)
+[![Test Status](https://github.com/iand/logfmtr/actions/workflows/test.yml/badge.svg)](https://github.com/iand/logfmtr/actions/workflows/test.yml)
+
 
 ## Getting Started
 
